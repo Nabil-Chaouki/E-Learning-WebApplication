@@ -1,0 +1,370 @@
+﻿@model E_Learning_Prototype.Models.InfomationViewModel
+@{
+    ViewBag.Title = "Index";
+}
+<div class="row mb-2 justify-content-center">
+    <div class="col-sm-10">
+
+        <div class="card bg-dark text-white">
+            <img class="card-img-top" src="~/images/CardBackground.jpg" alt="Card image">
+            <div class="card-img-overlay d-flex flex-column">
+                <h1 class="card-title">@Model.Classname</h1>
+                <p class="card-blue"> @Model.ClassSubject </p>
+                <div class="mt-auto text-center">
+                    <a style="color: inherit;" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1"><i class="fas fa-angle-down"></i></a>
+
+                </div>
+            </div>
+        </div>
+        <div class="collapse multi-collapse" id="multiCollapseExample1">
+            <div class="card card-body">
+                Code: @Model.Course_code
+            </div>
+        </div>
+
+
+        <a id="Share_Info" href="javascript:void(0)">
+            <div class="card card-body">
+                partagez quelque chose avec votre classe
+            </div>
+        </a>
+
+
+        <div id="Info_Form" class="card card-body" hidden>
+            @using (Html.BeginForm())
+            {
+                @Html.HiddenFor(x => x.Course_code)
+                <div id="MessageText" class="form-group row">
+                    <label for="Info">Message </label>
+                    @Html.TextAreaFor(x => x.Message, new { style = "resize:none", id = "Info", rows = "4", @class = "form-control", placeholder = "Partager avec votre class" })
+                    @*<textarea id="Info" style="resize:none" rows="4" class="form-control" placeholder="Partager avec votre class"></textarea>*@
+                </div>
+
+                <div id="filesPreview">
+
+                </div>
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-paperclip"></i> Ajouter
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <button type="button" class="dropdown-item" data-toggle="modal" data-target="#modal-lg">
+                                    Fichier
+                                </button>
+                                <button type="button" class="dropdown-item" data-toggle="modal" data-target="#modal-sm">
+                                    Lien
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-right col-md-6">
+                        <button id="Cancel_Info" type="button" class="btn btn-default">Cancel</button>
+                        <button id="Submit" type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!--TimeLine-->
+        <div class="timeline">
+
+            @if (Model.infos.Count != 0)
+            {
+                for (int i = Model.infos.Count - 1; i >= 0; i--)
+                {
+                    if (Model.LatestDatesPerDay.Contains(Model.infos[i].Publish_Date))
+                    {
+                        <!-- timeline time label -->
+                        <div class="time-label">
+                            <span class="bg-red">@Model.infos[i].Publish_Date.ToString("dd MMMM yyyy")</span>
+                        </div>
+                        <!-- /.timeline-label -->
+                    }
+                    <!-- timeline item -->
+                    <div>
+                        <i class="fas fa-envelope bg-blue"></i>
+                        <div class="timeline-item">
+                            <span class="time"><i class="fas fa-clock"></i> @Model.infos[i].Publish_Date.ToString("HH:mm")</span>
+                            <h3 class="timeline-header"><a href="#">@Model.infos[i].user.First_Name @Model.infos[i].user.Last_Name</a> envoyé une information</h3>
+
+                            <div class="timeline-body">
+                                @Model.infos[i].Message
+
+                                <br />
+                                <br />
+
+                                @foreach (var item in Model.infos[i].Attachements)
+                                {
+                                    if (item.Type != "Url")
+                                    {
+                                        <a href="@Url.Action("Download","Stream",new {FileID=item.Id })">
+                                            <div class="card card-body">
+                                                @item.FileName
+                                            </div>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a href="//@item.url">
+                                            <div class="card card-body">
+                                                @item.url
+                                            </div>
+                                        </a>
+                                    }
+
+                                }
+
+                            </div>
+                            @*<div class="timeline-footer">
+                                    <a class="btn btn-primary btn-sm">Read more</a>
+                                    <a class="btn btn-danger btn-sm">Delete</a>
+                                </div>*@
+                        </div>
+                    </div>
+                }
+            }
+            <!-- END timeline item -->
+            <div>
+                <i class="fas fa-clock bg-gray"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal lien -->
+    <div class="modal fade" id="modal-sm" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Ajouter Lien</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input id="lien" class="form-control" placeholder="exp: www.google.com" />
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="AjouterLien" type="button" class="btn btn-primary">Ajouter</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- modal File-->
+    <div class="modal fade" id="modal-lg" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                @Html.ValidationSummary()
+                @using (Html.BeginForm("SaveFiles", "Stream"))
+                {
+                    <div class="modal-header">
+                        <h4 class="modal-title">Ajouter File</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="filesAddedCard">
+
+                        </div>
+                        <div id="Files" class="text-center">
+
+                            <div class="custom-file">
+                                <input name="files" type="file" class="custom-file-input Attachement" id="Attachement">
+                                <label id="FileLabel" class="custom-file-label" for="Attachement">Choose file</label>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="progress">
+                            <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button id="saveFiless" type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <!-- /.modal -->
+
+</div>
+
+
+
+
+
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            var AttachementId = 0;
+            var formData = new FormData();
+
+
+            //Partager Info toggle
+            $('#Share_Info').on('click', function () {
+                $('#Share_Info').attr("hidden", true);
+                $('#Info_Form').removeAttr("hidden");
+            });
+            $('#Cancel_Info').on('click', function () {
+                $('#Share_Info').removeAttr("hidden");
+                $('#Info_Form').attr("hidden", true);
+
+            });
+
+            $('#DeleteFileInput').on('click', function () {
+                alert('hahahaha');
+            });
+
+            $(document).on('change', '.Attachement', function () {
+                var sizeFile = this.files[0].size / 1024 / 1024;
+                if (sizeFile < 100) {
+
+
+                    var fileName = this.files[0].name;
+                    //var FileInputId = 'Attachement' + ++AttachementId;
+                    //$("#Files").append('<input type="file" id="' + FileInputId + '" class="Attachement" style="display: none;" />');
+                    formData.append(fileName, this.files[0]);
+
+
+
+                    //Card element
+                    var CardFile = document.createElement('div');
+                    var CardAttr = document.createAttribute('class');
+                    CardAttr.value = "card card-body";
+                    CardFile.setAttributeNode(CardAttr);
+                    CardFile.setAttribute('id', fileName + 'Card');
+
+                    //row div
+                    var row = document.createElement('div');
+                    var rowAttr = document.createAttribute('class');
+                    rowAttr.value = "row";
+                    row.setAttributeNode(rowAttr);
+                    CardFile.appendChild(row);
+
+
+                    //left side of the div
+                    var cols = document.createElement('div');
+                    var colsAttr = document.createAttribute('class');
+                    colsAttr.value = "col-md-11";
+                    cols.setAttributeNode(colsAttr);
+                    row.appendChild(cols);
+
+                    //right side of the div
+                    var colsR = document.createElement('div');
+                    var colsRAttr = document.createAttribute('class');
+                    colsRAttr.value = "col-md-1";
+                    colsR.setAttributeNode(colsRAttr);
+                    row.appendChild(colsR);
+
+                    //icon element
+                    var icon = document.createElement('i');
+                    var iconClass = document.createAttribute('class');
+                    iconClass.value = "fas fa-file";
+                    icon.setAttributeNode(iconClass);
+                    var iconStyle = document.createAttribute('style');
+                    iconStyle.value = "padding-right: 30px";
+                    icon.setAttributeNode(iconStyle);
+
+
+                    //this p element gets the icon and fileName  beside eachother
+                    var p = document.createElement('p');
+                    p.appendChild(icon);
+                    p.append(fileName);
+                    cols.appendChild(p);
+
+
+                    //Delete button
+                    var btDelete = document.createElement('button');
+                    btDelete.setAttribute('type', 'button');
+                    btDelete.setAttribute('id', fileName + 'ToDeleteBtn');
+                    btDelete.setAttribute('class', 'deleteFileBtn');
+                    btDelete.setAttribute('style', 'background: none; color: inherit; border: none; padding: 0; font: inherit; cursor: pointer; outline: inherit;');
+
+                    var DeleteIcon = document.createElement('i');
+                    var DeleteIconClass = document.createAttribute('class');
+                    DeleteIconClass.value = "fas fa-trash-alt";
+                    DeleteIcon.setAttributeNode(DeleteIconClass);
+
+                    btDelete.appendChild(DeleteIcon);
+                    colsR.appendChild(btDelete);
+
+                    document.getElementById('filesAddedCard').appendChild(CardFile);
+
+
+                } else {
+                    alert('la taille du fichier ne doit pas dépasser 100 MB');
+                }
+            });
+
+            $(document).on('click', '.deleteFileBtn', function () {
+                var ElementID = this.id.replace('ToDeleteBtn', '');
+                formData.delete(ElementID);
+
+                var CardElementID = ElementID + 'Card';
+                $('#' + $.escapeSelector(CardElementID)).remove();
+
+            });
+
+            $("#saveFiless").click(function () {
+                var i = 0;
+                for (var pair of formData.entries()) {
+                    i++;
+                }
+                alert(i);
+                $.ajax({
+                    url: '/Stream/SaveFiles',
+                    type: 'post',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        for (var i = 0; i < response.response.length; i++) {
+                            formData = new FormData();
+                            $('#filesAddedCard').html('');
+                            $("#files").val(null);
+                            $('#filesPreview').append('<div class="card card-body">' + response.response[i] + '</div>');
+                            $('#modal-lg').modal('toggle');
+                        }
+                    },
+                    xhr: function () {
+                        //Get XmlHttpRequest object
+                        var xhr = $.ajaxSettings.xhr();
+                        //Set onprogress event handler
+                        xhr.upload.onprogress = function (data) {
+                            var perc = Math.round((data.loaded / data.total) * 100);
+                            $('#progressBar').text(perc + '%');
+                            $('#progressBar').css('width', perc + '%');
+                        };
+                        return xhr;
+                    },
+                });
+            });
+
+            //Ajouter lien
+            $("#AjouterLien").click(function () {
+                var link = $('#lien').val();
+                $.ajax({
+                    url: '/Stream/SaveLink',
+                    data: { Link: link },
+                    type: 'GET',
+                    dataType: 'json',
+                    contentType: "application/json; charset=utf-8",
+                    success: function (response) {
+                    },
+                });
+
+                var link = $("#lien").val();
+                $('#filesPreview').append('<div class="card card-body"> <a href="//' + link + '">' + link + '</a> </div>');
+                $('#modal-sm').modal('toggle');
+            });
+        });
+    </script>
+}

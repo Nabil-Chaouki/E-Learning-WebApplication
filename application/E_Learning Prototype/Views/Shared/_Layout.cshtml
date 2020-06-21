@@ -1,0 +1,104 @@
+﻿@{
+    var Code = ViewContext.RouteData.Values["Code"];
+}
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>E-learning</title>
+
+    @Styles.Render("~/Content/css")
+    @RenderSection("Styles", false)
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+</head>
+<body class="layout-top-nav">
+    <div class="wrapper">
+
+
+        <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
+            <div class="container">
+                <a href="#" class="navbar-brand">
+                    <img src="~/images/Logo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8" />
+                    <span class="brand-text font-weight-light">E_learning</span>
+                </a>
+
+                <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+                    <!-- Left navbar links -->
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index","Course")" class="nav-link">Cours</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index","Stream",new {Code=Code })" class="nav-link">Flux</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index","Devoir",new {Code=Code })" class="nav-link">Devoire</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <ul class="navbar-nav ml-auto">
+                <!-- Messages Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    @if (Request.IsAuthenticated)
+                    {
+                        using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+                        {
+                            @Html.AntiForgeryToken()
+                    <button class="nav-link" style="border:none;color:inherit;background: none;">
+                        <i class="fas fa-sign-out-alt"></i> Déconnecter
+                    </button>
+                        }
+                    }
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Main content -->
+            <div class="content-header">
+                <div class="container-fluid">
+                    @RenderBody()
+                </div><!-- /.container-fluid -->
+            </div>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+            <div class="p-3">
+                <h5>Title</h5>
+                <p>Sidebar content</p>
+            </div>
+        </aside>
+        <!-- /.control-sidebar -->
+        <!-- Main Footer -->
+    </div>
+    <!-- ./wrapper -->
+    <!-- REQUIRED SCRIPTS -->
+    <!-- jQuery -->
+    @*<script src="plugins/jquery/jquery.min.js"></script>*@
+    @Scripts.Render("~/bundles/jquery")
+    <!-- Bootstrap 4 -->
+    @*<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>*@
+    @Scripts.Render("~/bundles/bootstrap")
+    <!-- AdminLTE App -->
+    @*<script src="dist/js/adminlte.min.js"></script>*@
+    @Scripts.Render("~/bundles/adminlte")
+    @RenderSection("scripts", false)
+</body>
+</html>

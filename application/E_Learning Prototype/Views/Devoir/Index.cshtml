@@ -1,0 +1,130 @@
+﻿@model IEnumerable<E_Learning_Prototype.Models.DevoirViewModel>
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="row mb-2 justify-content-center">
+    <div class="col-sm-8">
+        <div class="row" style="margin-bottom:20px">
+            <div class="col-sm-4">
+                <h1>Les Devoirs :</h1>
+            </div>
+            <div class="col-sm-8 text-right">
+                @if (User.IsInRole("Teacher"))
+                {
+                    @Html.ActionLink("Ajouter Devoire", "AddDevoir", "Devoir", new { Code = ViewBag.Code }, new { @class = "btn btn-primary" })
+                }
+            </div>
+        </div>
+        @{ int i = 0; }
+        @foreach (var item in Model)
+        {
+            <div id="accordion">
+                <div class="card">
+                    <div class="card-header row" id="headingOne">
+
+                        <div class="col-sm-10">
+                            <div class="row">
+                                <div class="col-sm-1 d-flex align-items-center justify-content-center">
+
+                                    <i class="fas fa-file-alt" style="color:#007bff;font-size: 26px;"></i>
+
+                                </div>
+
+                                <button class="btn btn-link collapsed col-sm-11 text-left" data-toggle="collapse" data-target="#collapse_@i" aria-expanded="false" aria-controls="collapseOne">
+
+                                    <h6 style="padding-top:9px">@item.Titre</h6>
+                                </button>
+                            </div>
+                        </div>
+
+                        @if (item.Done)
+                        {
+                            <div class="col-sm-2  d-flex align-items-center justify-content-center">
+                                <i class="fas fa-check-circle" style="color:lawngreen"></i> <b>Terminé</b>
+                            </div>
+                        }
+                        @if (User.IsInRole("Teacher"))
+                        {
+                            <div class="col-sm-2  d-flex align-items-center justify-content-center">
+                                @using (Html.BeginForm("DeleteDevoir", "Devoir"))
+                                {
+                                    @Html.Hidden("Id_Devoir", item.Id_Devoir)
+                                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                                }
+                            </div>
+                        }
+
+                    </div>
+
+                    <div id="collapse_@i" class="collapse" aria-labelledby="headingOne" data-parent="#accordion" style="">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6>
+                                        <b>
+                                            @item.Theme
+                                        </b>
+                                    </h6>
+                                    <p>
+                                        @item.instructions
+                                    </p>
+                                </div>
+                                <div class="col-md-2" style="border-left: 1px solid #007bff">
+                                    <h1>
+                                        @item.HandedIn
+                                    </h1>
+                                    Remis
+                                </div>
+                                <div class="col-md-2" style="border-left: 1px solid #007bff">
+                                    <h1>@item.Assigned</h1>
+                                    attribué
+                                </div>
+                            </div>
+                            <br />
+                            @foreach (var att in item.Attachements)
+                            {
+                                if (att.Type != "Url")
+                                {
+                                    <div class="card card-body">
+                                        <a href="@Url.Action("Download","Devoir",new { FileID=att.Id })">
+                                            @att.FileName
+                                        </a>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <a href="//@att.url">
+                                        <div class="card card-body">
+                                            @att.url
+                                        </div>
+                                    </a>
+                                }
+                            }
+
+                        </div>
+                        <div class="card-footer row">
+                            <div class="col-sm-9">
+                                @if (User.IsInRole("Student"))
+                                {
+                                    @Html.ActionLink("Afficher devoire", "RendreDevoir", "Devoir", new { id_devoire = item.Id_Devoir }, null)
+                                }
+                                else
+                                {
+                                    @Html.ActionLink("Afficher Les rendres", "DetailsDevoir", "Devoir", new { id_devoire = item.Id_Devoir }, null)
+                                }
+                            </div>
+                            <div class="col-sm-3">
+                                Date limite : @item.DateLimite.ToString("yyyy/MM/dd")
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+                @{ i++; }
+
+            </div>
+        }
+    </div>
+</div>

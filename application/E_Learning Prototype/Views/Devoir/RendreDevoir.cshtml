@@ -1,0 +1,424 @@
+﻿@model E_Learning_Prototype.Models.RendreDevoirViewModel
+@{
+    ViewBag.Title = "RendreDevoir";
+
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>AdminLTE 3 | Starter</title>
+
+    @Styles.Render("~/Content/css")
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+</head>
+<body class="layout-top-nav">
+    <div class="wrapper">
+
+
+        <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
+            <div class="container">
+                <a href="#" class="navbar-brand">
+                    <img src="~/images/Logo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8" />
+                    <span class="brand-text font-weight-light">E_learning</span>
+                </a>
+
+                <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+                    <!-- Left navbar links -->
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index","Course")" class="nav-link">Cours</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index","Stream",new {Code=ViewBag.CodeDevoir })" class="nav-link">Flux</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index","Devoir",new {Code=ViewBag.CodeDevoir })" class="nav-link">Devoire</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <ul class="navbar-nav ml-auto">
+                <!-- Messages Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    @if (Request.IsAuthenticated)
+                    {
+                        using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button class="nav-link" style="border:none;color:inherit;background: none;">
+                                <i class="fas fa-sign-out-alt"></i> Déconnecter
+                            </button>
+                        }
+                    }
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Main content -->
+            <div class="content-header">
+                <div class="container-fluid">
+
+
+
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-sm-8">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h2>@Model.Devoir.Titre</h2>
+                                    <br />
+                                    <p class="card-text">@Model.Devoir.instructions</p>
+                                </div>
+                                <div class="card-footer">
+                                    @foreach (var att in Model.Devoir.Attachements)
+                                    {
+                                        if (att.Type != "Url")
+                                        {
+                                            <a href="@Url.Action("Download","Devoir",new {FileID=att.Id  })">
+                                                <div class="card card-body">
+                                                    @att.FileName
+                                                </div>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="//@att.url">
+                                                <div class="card card-body">
+                                                    @att.url
+                                                </div>
+                                            </a>
+                                        }
+
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="card-body card">
+                                <h3>Votre travail</h3>
+                                @if (Model.Render_devoir == null)
+                                {
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle form-control" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-paperclip"></i> Ajouter
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <button type="button" class="dropdown-item" data-toggle="modal" data-target="#modal-lg">
+                                                Fichier
+                                            </button>
+                                            <button type="button" class="dropdown-item" data-toggle="modal" data-target="#modal-sm">
+                                                Lien
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                                <br />
+
+                                <div id="filesPreview">
+                                    @if (Model.Render_devoir != null)
+                                    {
+                                        foreach (var att in Model.Render_devoir.Attachements)
+                                        {
+
+                                            if (att.Type != "Url")
+                                            {
+                                                <div class="card card-body">
+                                                    <a href="@Url.Action("Download","Devoir",new {FileID=att.Id  })">
+
+                                                        @att.FileName
+                                                    </a>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <a href="//@att.url">
+                                                    <div class="card card-body">
+                                                        @att.url
+                                                    </div>
+                                                </a>
+                                            }
+                                        }
+                                    }
+                                </div>
+
+                                <br />
+                                @if (Model.Render_devoir != null)
+                                {
+                                    <button type="button" class="btn btn-success form-control" disabled>Terminé</button>
+                                }
+                                else
+                                {
+                                    using (Html.BeginForm())
+                                    {
+                                        @Html.HiddenFor(x => x.Devoir.Id);
+                                        <button type="submit" class="btn btn-primary form-control">Envoyer</button>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                    <!-- modal lien -->
+                    <div class="modal fade" id="modal-sm" style="display: none;" aria-hidden="true">
+                        <div class="modal-dialog modal-sm">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Ajouter Lien</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">×</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <input id="lien" class="form-control" placeholder="exp: www.google.com" />
+                                </div>
+                                <div class="modal-footer justify-content-between">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button id="AjouterLien" type="button" class="btn btn-primary">Ajouter</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <!-- modal File-->
+                    <div class="modal fade" id="modal-lg" style="display: none;" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                @Html.ValidationSummary()
+                                @using (Html.BeginForm("SaveFiles", "Stream"))
+                                {
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Ajouter File</h4>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">×</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div id="filesAddedCard">
+
+                                        </div>
+                                        <div id="Files" class="text-center">
+
+                                            <div class="custom-file">
+                                                <input name="files" type="file" class="custom-file-input Attachement" id="Attachement">
+                                                <label id="FileLabel" class="custom-file-label" for="Attachement">Choose file</label>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div class="progress">
+                                            <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer justify-content-between">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                        <button id="saveFiless" type="button" class="btn btn-primary">Save changes</button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.modal -->
+
+                </div><!-- /.container-fluid -->
+            </div>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+            <div class="p-3">
+                <h5>Title</h5>
+                <p>Sidebar content</p>
+            </div>
+        </aside>
+        <!-- /.control-sidebar -->
+        <!-- Main Footer -->
+    </div>
+    <!-- ./wrapper -->
+    <!-- REQUIRED SCRIPTS -->
+    <!-- jQuery -->
+    @*<script src="plugins/jquery/jquery.min.js"></script>*@
+    @Scripts.Render("~/bundles/jquery")
+    <!-- Bootstrap 4 -->
+    @*<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>*@
+    @Scripts.Render("~/bundles/bootstrap")
+    <!-- AdminLTE App -->
+    @*<script src="dist/js/adminlte.min.js"></script>*@
+    @Scripts.Render("~/bundles/adminlte")
+    <script src="~/Scripts/moment.min.js"></script>
+    <script src="~/Scripts/daterangepicker.js"></script>
+    <script>
+
+        var AttachementId = 0;
+        var formData = new FormData();
+
+        $(document).on('change', '.Attachement', function () {
+            var sizeFile = this.files[0].size / 1024 / 1024;
+            if (sizeFile < 100) {
+
+
+                var fileName = this.files[0].name;
+                //var FileInputId = 'Attachement' + ++AttachementId;
+                //$("#Files").append('<input type="file" id="' + FileInputId + '" class="Attachement" style="display: none;" />');
+                formData.append(fileName, this.files[0]);
+
+
+
+                //Card element
+                var CardFile = document.createElement('div');
+                var CardAttr = document.createAttribute('class');
+                CardAttr.value = "card card-body";
+                CardFile.setAttributeNode(CardAttr);
+                CardFile.setAttribute('id', fileName + 'Card');
+
+                //row div
+                var row = document.createElement('div');
+                var rowAttr = document.createAttribute('class');
+                rowAttr.value = "row";
+                row.setAttributeNode(rowAttr);
+                CardFile.appendChild(row);
+
+
+                //left side of the div
+                var cols = document.createElement('div');
+                var colsAttr = document.createAttribute('class');
+                colsAttr.value = "col-md-11";
+                cols.setAttributeNode(colsAttr);
+                row.appendChild(cols);
+
+                //right side of the div
+                var colsR = document.createElement('div');
+                var colsRAttr = document.createAttribute('class');
+                colsRAttr.value = "col-md-1";
+                colsR.setAttributeNode(colsRAttr);
+                row.appendChild(colsR);
+
+                //icon element
+                var icon = document.createElement('i');
+                var iconClass = document.createAttribute('class');
+                iconClass.value = "fas fa-file";
+                icon.setAttributeNode(iconClass);
+                var iconStyle = document.createAttribute('style');
+                iconStyle.value = "padding-right: 30px";
+                icon.setAttributeNode(iconStyle);
+
+
+                //this p element gets the icon and fileName  beside eachother
+                var p = document.createElement('p');
+                p.appendChild(icon);
+                p.append(fileName);
+                cols.appendChild(p);
+
+
+                //Delete button
+                var btDelete = document.createElement('button');
+                btDelete.setAttribute('type', 'button');
+                btDelete.setAttribute('id', fileName + 'ToDeleteBtn');
+                btDelete.setAttribute('class', 'deleteFileBtn');
+                btDelete.setAttribute('style', 'background: none; color: inherit; border: none; padding: 0; font: inherit; cursor: pointer; outline: inherit;');
+
+                var DeleteIcon = document.createElement('i');
+                var DeleteIconClass = document.createAttribute('class');
+                DeleteIconClass.value = "fas fa-trash-alt";
+                DeleteIcon.setAttributeNode(DeleteIconClass);
+
+                btDelete.appendChild(DeleteIcon);
+                colsR.appendChild(btDelete);
+
+                document.getElementById('filesAddedCard').appendChild(CardFile);
+            } else {
+                alert('la taille du fichier ne doit pas dépasser 100 MB');
+            }
+        });
+
+        $(document).on('click', '.deleteFileBtn', function () {
+            var ElementID = this.id.replace('ToDeleteBtn', '');
+            formData.delete(ElementID);
+
+            var CardElementID = ElementID + 'Card';
+            $('#' + $.escapeSelector(CardElementID)).remove();
+
+        });
+
+        $("#saveFiless").click(function () {
+
+            $.ajax({
+                url: '/Devoir/SaveFiles',
+                type: 'post',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    for (var i = 0; i < response.response.length; i++) {
+                        formData = new FormData();
+                        $('#filesAddedCard').html('');
+                        $("#files").val(null);
+                        $('#filesPreview').append('<div class="card card-body">' + response.response[i] + '</div>');
+                        $('#modal-lg').modal('toggle');
+
+
+                    }
+                },
+                xhr: function () {
+                    //Get XmlHttpRequest object
+                    var xhr = $.ajaxSettings.xhr();
+                    //Set onprogress event handler
+                    xhr.upload.onprogress = function (data) {
+                        var perc = Math.round((data.loaded / data.total) * 100);
+                        $('#progressBar').text(perc + '%');
+                        $('#progressBar').css('width', perc + '%');
+                    };
+                    return xhr;
+                },
+            });
+        });
+
+        //Ajouter lien
+        $("#AjouterLien").click(function () {
+            var link = $('#lien').val();
+            $.ajax({
+                url: '/Stream/SaveLink',
+                data: { Link: link },
+                type: 'GET',
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                },
+            });
+
+            var link = $("#lien").val();
+            $('#filesPreview').append('<div class="card card-body"> <a href="//' + link + '">' + link + '</a> </div>');
+            $('#modal-sm').modal('toggle');
+        });
+
+
+
+    </script>
+</body>
+</html>
+
+
+
+
+
